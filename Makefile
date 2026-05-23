@@ -15,20 +15,7 @@ api-start:
 	./scripts/start_api.sh
 
 api-stop:
-	@if [ -f outputs/api.pid ]; then \
-		PID="$$(cat outputs/api.pid)"; \
-		if kill -0 "$$PID" 2>/dev/null && ps -p "$$PID" -o args= | grep -q "uvicorn src.main:app"; then \
-			kill "$$PID"; \
-			rm -f outputs/api.pid; \
-			echo "API detenida."; \
-		else \
-			echo "PID file obsoleto. Limpiando outputs/api.pid."; \
-			rm -f outputs/api.pid; \
-		fi; \
-	else \
-		echo "No existe outputs/api.pid. Intentando detener uvicorn por patrón..."; \
-		pkill -f "uvicorn src.main:app" || true; \
-	fi
+	./scripts/stop_api.sh
 
 obs-start:
 	docker compose up -d prometheus grafana
