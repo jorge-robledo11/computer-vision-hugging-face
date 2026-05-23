@@ -14,3 +14,5 @@ services:
     network_mode: host
     depends_on:
       - prometheus
+    volumes:
+      - ./infra/grafana.yaml:/etc/grafana/provisioning/datasources/grafana.yaml:ro
