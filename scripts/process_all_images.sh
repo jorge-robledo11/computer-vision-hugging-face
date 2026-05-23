@@ -3,20 +3,24 @@ set -euo pipefail
 
 API_URL="${API_URL:-http://localhost:8000}"
 IMGS_DIR="${IMGS_DIR:-imgs}"
-OUTPUT_DIR="${OUTPUT_DIR:-output}"
+OUTPUT_DIR="${OUTPUT_DIR:-outputs}"
 CONCURRENCY="${CONCURRENCY:-3}"
 
 PROMPT="${PROMPT:-Describe la imagen en español de forma clara y breve. Incluye también una lista corta de los elementos u objetos visibles.}"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$PROJECT_ROOT"
+
 mkdir -p "$OUTPUT_DIR/descriptions"
 
-echo "API:         $API_URL"
-echo "Imágenes:    $IMGS_DIR"
-echo "Output:      $OUTPUT_DIR/descriptions"
+echo "API:          $API_URL"
+echo "Imágenes:     $IMGS_DIR"
+echo "Output:       $OUTPUT_DIR/descriptions"
 echo "Concurrencia: $CONCURRENCY"
 echo
 
-# Validar que la API esté viva
 curl -fsS "$API_URL/health" >/dev/null
 
 echo "API OK"
@@ -52,7 +56,7 @@ find "$IMGS_DIR" -maxdepth 1 -type f \( \
   -iname "*.png" -o \
   -iname "*.webp" \
 \) -print0 \
-  | xargs -0 -n 1 -P "$CONCURRENCY" bash -c 'process_image "$0"'
+  | xargs -r -0 -n 1 -P "$CONCURRENCY" bash -c 'process_image "$1"' _
 
 echo
 echo "Proceso terminado."

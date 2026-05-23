@@ -10,5 +10,9 @@ wheels/
 .venv
 .cache/
 models/
-contexts/
+context/
 .vscode/
+outputs/logs/
+outputs/*.pid
+*.pid
+*.log

@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
+import uvicorn
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from scalar_fastapi import get_scalar_api_reference
 
 from src.config.config import MODELS_DIR
@@ -34,6 +36,19 @@ app = FastAPI(
 )
 
 
+Instrumentator(
+    should_group_status_codes=True,
+    should_ignore_untemplated=True,
+    should_respect_env_var=False,
+    should_instrument_requests_inprogress=True,
+    excluded_handlers=["/metrics"],
+).instrument(app).expose(
+    app,
+    endpoint="/metrics",
+    include_in_schema=False,
+)
+
+
 app.include_router(health_router)
 app.include_router(images_router)
 
@@ -47,8 +62,6 @@ async def scalar_html():
 
 
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run(
         "src.main:app",
         host="0.0.0.0",

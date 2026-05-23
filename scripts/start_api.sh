@@ -3,15 +3,27 @@ set -euo pipefail
 
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-8000}"
-LOG_DIR="${LOG_DIR:-output/logs}"
-PID_FILE="${PID_FILE:-output/api.pid}"
+LOG_DIR="${LOG_DIR:-outputs/logs}"
+PID_FILE="${PID_FILE:-outputs/api.pid}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$PROJECT_ROOT"
 
 mkdir -p "$LOG_DIR"
 mkdir -p "$(dirname "$PID_FILE")"
 
-if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
-  echo "La API ya está corriendo con PID $(cat "$PID_FILE")"
-  exit 0
+if [[ -f "$PID_FILE" ]]; then
+  PID="$(cat "$PID_FILE")"
+
+  if kill -0 "$PID" 2>/dev/null && ps -p "$PID" -o args= | grep -q "uvicorn src.main:app"; then
+    echo "La API ya está corriendo con PID $PID"
+    exit 0
+  fi
+
+  echo "PID file obsoleto. Limpiando $PID_FILE."
+  rm -f "$PID_FILE"
 fi
 
 echo "Levantando API en http://$HOST:$PORT ..."
